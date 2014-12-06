@@ -1,7 +1,7 @@
 
 ### 使用方法：
-1. 创建channel.txt，在其中输入渠道号名称以及渠道的数字，规则参考示例，当然也可以自己修改脚本替换其中manifest中不同的字段
-2. 添加signing.properties文件，配置进行签名使用的参数，脚本会从这个文件中读取签名使用需要使用的参数
+1. 创建channel.txt，在其中输入渠道号名称以及渠道的数字，规则参考示例文件；需要说明一下的是，product flavor的是通过channel.txt动态生成的，通过读取channel.txt来动态生成flavor，可以根据需要自由改动；我们应用中的渠道号需要两个参数，在manifest中添加两个APP_KEY_PLACEHOLDER和APP_PID_PLACEHOLDER，脚本中通过读取channel.txt中的值来动态替换这两个字段即可。需要多少个渠道包，在channel.txt中输入多少行即可，注意最后一行不能为空
+2. 添加signing.properties文件，配置进行签名使用的参数，脚本会从这个文件中读取签名使用需要使用的参数，注意签名文件的路径需要设置绝对路径
 3. 添加proguard-rules.txt文件，添加自己的混淆规则
 
 =====================
