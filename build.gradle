@@ -1,0 +1,144 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0-rc4'
+    }
+}
+
+apply plugin: 'com.android.application'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: '*.jar')
+}
+
+// Set encoding
+tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.1"
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+        }
+
+        // Move the tests to tests/java, tests/res, etc...
+        instrumentTest.setRoot('tests')
+
+        // Move the build types to build-types/<type>
+        // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
+        // This moves them out of them default location under src/<type>/... which would
+        // conflict with src/ being used by the main source set.
+        // Adding new build types or product flavors should be accompanied
+        // by a similar customization.
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+
+    // Exclude unneeded files
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
+    }
+	
+	// Remove warnings
+	lintOptions {
+      checkReleaseBuilds false
+      // Or, if you prefer, you can continue to check for errors in release builds,
+      // but continue the build even when errors are found:
+      abortOnError false
+  	}
+	
+	// productFlavors
+	productFlavors {
+		def path="./channel.txt"
+		file(path).eachLine { line->
+			def words = line.split(':')
+			def key = words[0]
+			def channel = words[1]
+			if (key == '') {
+				key = channel
+			}
+			def name = 's'+channel
+			"$name" {
+				manifestPlaceholders=[APP_KEY_PLACEHOLDER:key, APP_PID_PLACEHOLDER:name]
+			}
+		}
+	}
+	
+	signingConfigs {
+	    release
+	}
+    buildTypes {
+        release {
+			      signingConfig signingConfigs.release
+			
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
+                          'proguard-rules.txt'
+        }
+    }
+}
+
+// signing
+def propFile = file('./signing.properties')
+if( propFile.canRead() ) {
+  def Properties p = new Properties()
+  p.load(new FileInputStream(propFile))
+
+  if( p!=null
+  &&  p.containsKey('STORE_FILE')
+  &&  p.containsKey('STORE_PASSWORD')
+  &&  p.containsKey('KEY_ALIAS')
+  &&  p.containsKey('KEY_PASSWORD')
+  ) {
+    println "RELEASE_BUILD: Signing..."
+
+    android.signingConfigs.release.storeFile = file( p['STORE_FILE'] )
+    android.signingConfigs.release.storePassword = p['STORE_PASSWORD']
+    android.signingConfigs.release.keyAlias = p['KEY_ALIAS']
+    android.signingConfigs.release.keyPassword = p['KEY_PASSWORD']
+
+  } else {
+    println "RELEASE_BUILD: Required properties in signing.properties are missing"
+    android.buildTypes.release.signingConfig = null
+  }
+} else {
+  println "RELEASE_BUILD: signing.properties not found"
+  android.buildTypes.release.signingProperties = null
+}
+
+android.applicationVariants.all{ variant ->
+	// custom package name
+	def apk = variant.outputs[0].outputFile;
+	def versionName = android.defaultConfig.versionName;
+    def newName = "";
+    if (variant.buildType.name == "release") {
+        newName = apk.name.replace(".apk", "_V" + versionName + "_release.apk");
+    } else {
+        newName = apk.name.replace(".apk", "_V" + versionName + "_debug.apk");
+    }
+    newName = newName.replace("-" + variant.buildType.name, "");
+    variant.outputs[0].outputFile = new File(apk.parentFile, newName);
+    if (variant.outputs[0].zipAlign) {
+        variant.outputs[0].zipAlign.outputFile = new File(apk.parentFile, newName.replace("-unaligned", ""));
+    }
+}
