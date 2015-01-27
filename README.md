@@ -1,3 +1,4 @@
+关于gralde的使用总结博客链接：[http://blog.csdn.net/colorapp/article/details/41779473](http://blog.csdn.net/colorapp/article/details/41779473)
 
 ### 使用方法：
 1. 创建channel.txt，在其中输入渠道号名称以及渠道的数字，规则参考示例文件。需要说明一下的是，product flavor的是通过channel.txt动态生成的，通过读取channel.txt来动态生成flavor，可以根据需要自由改动。需要多少个渠道包，在channel.txt中输入多少行即可，注意最后一行不能为空。渠道较多的情况下，key可以不用填写，这是的key会默认使用渠道号加字母s做为渠道名称，参考脚本。
