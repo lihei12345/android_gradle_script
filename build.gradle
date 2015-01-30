@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0-rc4'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 
@@ -18,8 +18,8 @@ tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.1"
-
+    buildToolsVersion "21.1.2"
+    
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
