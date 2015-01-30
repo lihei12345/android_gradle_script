@@ -1,3 +1,5 @@
+import com.android.builder.core.DefaultManifestParser
+
 buildscript {
     repositories {
         mavenCentral()
@@ -127,9 +129,11 @@ if( propFile.canRead() ) {
 }
 
 android.applicationVariants.all{ variant ->
-	// custom package name
-	def apk = variant.outputs[0].outputFile;
-	def versionName = android.defaultConfig.versionName;
+	  // custom package name
+	  def apk = variant.outputs[0].outputFile;
+	  // def versionName = android.defaultConfig.versionName;
+    def manifestParser = new DefaultManifestParser()
+    def versionName =manifestParser.getVersionName(android.sourceSets.main.manifest.srcFile)
     def newName = "";
     if (variant.buildType.name == "release") {
         newName = apk.name.replace(".apk", "_V" + versionName + "_release.apk");
